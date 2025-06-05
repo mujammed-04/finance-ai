@@ -47,7 +47,13 @@ const languages = {
             resetSuccess: '✅ Your data has been reset successfully.',
             resetError: '❌ An error occurred while resetting your data. Please try again.',
             resetCancelled: 'Reset operation cancelled.'
-        }
+        },
+        income: 'Income',
+        expense: 'Expense',
+        report: 'Report',
+        settings: 'Settings',
+        help: 'Help',
+        wallets: 'Wallets',
     },
     ru: {
         welcome: 'Добро пожаловать в Finance AI Bot! Пожалуйста, выберите предпочитаемый язык:',
@@ -97,7 +103,13 @@ const languages = {
             resetSuccess: '✅ Ваши данные успешно сброшены.',
             resetError: '❌ Произошла ошибка при сбросе данных. Пожалуйста, попробуйте снова.',
             resetCancelled: 'Операция сброса отменена.'
-        }
+        },
+        income: 'Доходы',
+        expense: 'Расходы',
+        report: 'Отчеты',
+        settings: 'Настройки',
+        help: 'Помощь',
+        wallets: 'Кошельки',
     },
     kk: {
         welcome: 'Finance AI Bot-қа қош келдіңіз! Өзіңізге ыңғайлы тілді таңдаңыз:',
@@ -147,7 +159,13 @@ const languages = {
             resetSuccess: '✅ Сіздің деректеріңіз сәтті қалпына келтірілді.',
             resetError: '❌ Деректерді қалпына келтіру кезінде қате орын алды. Қайталап көріңіз.',
             resetCancelled: 'Қалпына келтіру операциясы болдырмалды.'
-        }
+        },
+        income: 'Кірістер',
+        expense: 'Шығыстар',
+        report: 'Есептер',
+        settings: 'Баптаулар',
+        help: 'Көмек',
+        wallets: 'Әмияндар',
     }
 };
 

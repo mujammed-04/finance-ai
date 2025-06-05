@@ -98,7 +98,7 @@ class CommandHandler {
         }
     }
 
-    async answerCallbackQuery(query, text) {
+    async answerCallbackQuery(query, text = '') {
         try {
             await this.bot.answerCallbackQuery(query.id, { text });
         } catch (error) {
@@ -123,7 +123,7 @@ class CommandHandler {
             `${selectedLanguage.features}\n\n${selectedLanguage.help}`
         );
         
-        await this.answerCallbackQuery(query);
+        await this.answerCallbackQuery(query, selectedLanguage.languageSelected);
     }
 
     async handleWalletCreation(query, type) {
@@ -136,7 +136,7 @@ class CommandHandler {
             userStates.set(userId, { command: 'addwallet', step: 'waiting_name' });
             await this.bot.deleteMessage(chatId, query.message.message_id);
             await this.bot.sendMessage(chatId, lang.wallet.createPrompt);
-            await this.answerCallbackQuery(query);
+            await this.answerCallbackQuery(query, lang.wallet.createPrompt);
             return;
         }
 
@@ -183,7 +183,7 @@ class CommandHandler {
                 };
                 await this.bot.deleteMessage(chatId, query.message.message_id);
                 await this.bot.sendMessage(chatId, lang.settings.selectLanguage, keyboard);
-                await this.answerCallbackQuery(query);
+                await this.answerCallbackQuery(query, lang.settings.selectLanguage);
                 break;
 
             case 'reset':
@@ -199,7 +199,7 @@ class CommandHandler {
                 };
                 await this.bot.deleteMessage(chatId, query.message.message_id);
                 await this.bot.sendMessage(chatId, lang.settings.resetWarning, resetKeyboard);
-                await this.answerCallbackQuery(query);
+                await this.answerCallbackQuery(query, lang.settings.resetWarning);
                 break;
 
             case 'reset_confirm':
@@ -207,20 +207,62 @@ class CommandHandler {
                     await database.resetUserData(userId);
                     await this.bot.deleteMessage(chatId, query.message.message_id);
                     await this.bot.sendMessage(chatId, lang.settings.resetSuccess);
-                    await this.answerCallbackQuery(query);
+                    await this.answerCallbackQuery(query, lang.settings.resetSuccess);
                 } catch (error) {
                     logger.error(`Error resetting data for user ${userId}:`, error);
                     await this.bot.sendMessage(chatId, lang.settings.resetError);
-                    await this.answerCallbackQuery(query);
+                    await this.answerCallbackQuery(query, lang.settings.resetError);
                 }
                 break;
 
             case 'reset_cancel':
                 await this.bot.deleteMessage(chatId, query.message.message_id);
                 await this.bot.sendMessage(chatId, lang.settings.resetCancelled);
-                await this.answerCallbackQuery(query);
+                await this.answerCallbackQuery(query, lang.settings.resetCancelled);
                 break;
         }
+    }
+
+    async handleWalletManagement(query, walletId) {
+        const chatId = query.message.chat.id;
+        const userId = query.from.id;
+        const language = userSettings.getLanguage(userId);
+        const lang = languages[language];
+
+        const wallet = database.getWalletById(userId, walletId);
+
+        if (!wallet) {
+            await this.bot.sendMessage(chatId, lang.wallet.notFound);
+            await this.answerCallbackQuery(query, lang.wallet.notFound);
+            return;
+        }
+
+        const walletInfo = `${lang.wallet.balance}: ${wallet.balance}\n${lang.wallet.currency}: ${wallet.currency}\n${lang.wallet.name}: ${wallet.name}`;
+
+        const keyboard = {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: '💳 ' + lang.wallet.editBalance, callback_data: `manage_wallet_${walletId}_edit_balance` },
+                        { text: '💰 ' + lang.wallet.editName, callback_data: `manage_wallet_${walletId}_edit_name` },
+                    ],
+                    [
+                        { text: '💳 ' + lang.wallet.editCurrency, callback_data: `manage_wallet_${walletId}_edit_currency` },
+                    ],
+                    [
+                        { text: '💳 ' + lang.income, callback_data: `manage_wallet_${walletId}_add_income` },
+                        { text: '💳 ' + lang.expense, callback_data: `manage_wallet_${walletId}_add_expense` },
+                    ],
+                    [
+                        { text: '🔙 ' + lang.wallet.back, callback_data: `wallets` },
+                    ]
+                ]
+            }
+        }
+
+        await this.bot.deleteMessage(chatId, query.message.message_id);
+        await this.bot.sendMessage(chatId, walletInfo, keyboard);
+        await this.answerCallbackQuery(query, walletInfo);
     }
 
     setupCommandHandlers() {
@@ -243,6 +285,9 @@ class CommandHandler {
                 } else if (data.startsWith('settings_')) {
                     const action = data.replace('settings_', '');
                     await this.handleSettings(query, action);
+                } else if (data.startsWith('manage_wallet_')){
+                    const walletId = data.replace('manage_wallet_', '');
+                    await this.handleWalletManagement(query, walletId);
                 } else {
                     await this.bot.sendMessage(chatId, 'Sorry, something went wrong. Please try again.');
                 }

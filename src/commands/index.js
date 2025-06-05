@@ -55,14 +55,17 @@ const commands = {
             return;
         }
 
-        const walletList = wallets.map(wallet => 
-            lang.wallet.listItem
-                .replace('{name}', wallet.name)
-                .replace('{currency}', wallet.currency)
-                .replace('{balance}', wallet.balance)
-        ).join('\n');
+        const keyboard = {
+            reply_markup: {
+                inline_keyboard: [
+                    ...wallets.map(wallet => [
+                        { text: wallet.name, callback_data: `manage_wallet_${wallet.id}` }
+                    ])
+                ]
+            }
+        };
 
-        await bot.sendMessage(chatId, `${lang.wallet.listHeader}\n${walletList}`);
+        await bot.sendMessage(chatId, lang.wallet.listHeader, keyboard);
     },
 
     addwallet: async (bot, msg) => {
@@ -91,15 +94,6 @@ const commands = {
         };
     
         await bot.sendMessage(chatId, lang.wallet.chooseOrCreate, keyboard);
-    },
-
-    editwallet: async (bot, msg) => {
-        const chatId = msg.chat.id;
-        const userId = msg.from.id;
-        const language = userSettings.getLanguage(userId);
-        const lang = languages[language];
-
-        await bot.sendMessage(chatId, 'Wallet editing feature coming soon!');
     },
 
     expense: async (bot, msg) => {
@@ -151,16 +145,6 @@ const commands = {
 
         await bot.sendMessage(chatId, lang.settings.title, keyboard);
     },
-
-    undo: async (bot, msg) => {
-        const chatId = msg.chat.id;
-        const userId = msg.from.id;
-        const language = userSettings.getLanguage(userId);
-        const lang = languages[language];
-
-        await bot.sendMessage(chatId, 'Undo feature coming soon!');
-        logger.info(`Undo command executed by user ${userId}`);
-    }
 };
 
 module.exports = { commands, userStates }; 

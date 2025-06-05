@@ -62,6 +62,11 @@ class DatabaseService {
         return stmt.run(userId, name, currency);
     }
 
+    getWalletById(userId, walletId) {
+        const stmt = this.db.prepare('SELECT * FROM wallets WHERE id = ? AND user_id = ?');
+        return stmt.get(walletId, userId);
+    }
+
     createDefaultWallet(userId) {
         const stmt = this.db.prepare('INSERT INTO wallets (user_id, name, currency) VALUES (?, ?, ?)');
         return stmt.run(userId, 'Наличка', 'KZT');
